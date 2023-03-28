@@ -3,16 +3,25 @@
 //
 
 #include <string>
-
-#ifndef WEATHERAPP_WEATHERAPI_H
-#define WEATHERAPP_WEATHERAPI_H
-
-
-class WeatherAPI {
-    WeatherAPI(std::string key);
+#include <curlpp/cURLpp.hpp>
+#include <curlpp/Options.hpp>
+#include <nlohmann/json.hpp>
 
 
-};
+namespace API {
 
+    class WeatherAPI {
+    private:
+        nlohmann::json json_data;
+        std::string key;
+    public:
 
-#endif //WEATHERAPP_WEATHERAPI_H
+        explicit WeatherAPI(std::string key);
+
+        bool update();
+        nlohmann::json getData();
+
+    };
+
+}
+
