@@ -7,6 +7,7 @@
 #include <curlpp/Options.hpp>
 #include <nlohmann/json.hpp>
 
+using json = nlohmann::json;
 
 namespace API {
 
@@ -14,13 +15,22 @@ namespace API {
     private:
         nlohmann::json json_data;
         std::string key;
+        double lat;
+        double lon;
+
+        static json makeAPIcall(const std::string& url);
+
     public:
 
         explicit WeatherAPI(std::string key);
 
+        void setLocation(double, double);
+
         bool update();
-        nlohmann::json getData();
-        nlohmann::json getDayData(int n);
+        json getData();
+        json getDayData(int n);
+
+        std::vector<json> getLocations(std::string, int);
 
     };
 
