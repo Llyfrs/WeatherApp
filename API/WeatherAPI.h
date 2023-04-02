@@ -20,6 +20,7 @@ namespace API {
 
         bool update();
         nlohmann::json getData();
+        nlohmann::json getDayData(int n);
 
     };
 

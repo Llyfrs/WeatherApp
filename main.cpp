@@ -1,4 +1,5 @@
 #include "API/WeatherAPI.h"
+#include "API/GeoAPI.h"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -15,8 +16,12 @@ int main() {
 
     auto json = weatherAPI.getData();
 
+
+    std::cout << json.at("hourly").size();
+
     nlohmann::json sunrise = json["current"];
-    std::cout << sunrise["sunrise"] << std::endl;
+    std::cout << weatherAPI.getDayData(0).at("temp") << std::endl;
+
 
     return 0;
 }

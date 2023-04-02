@@ -1,8 +1,8 @@
 # Weather App
 
 This is application providing user with current information about weather. 
-The data comes from [openweatherAPI](https://openweathermap.org/api). For the program to function to work properly
-API key from them is required. 
+The data comes from [openweatherAPI](https://openweathermap.org/api). For the program to work properly
+API key from them is required. It can be inserted in the settings.
 
 
 ### Requirements 
