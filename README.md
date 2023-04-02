@@ -11,4 +11,4 @@ This project is dependent on the [**curlpp**](http://www.curlpp.org/) and [**nlo
 
 ### Example
 
-[https://i.imgur.com/6L2vWmO.png]
+[Image](https://i.imgur.com/6L2vWmO.png)
