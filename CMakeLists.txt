@@ -2,12 +2,28 @@ cmake_minimum_required(VERSION 3.25)
 project(WeatherApp)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 
 include(FindPkgConfig)
 pkg_check_modules(CURLPP REQUIRED curlpp)
 pkg_check_modules(NLOHMANN REQUIRED nlohmann_json)
+pkg_check_modules(QT6 REQUIRED Qt6Widgets)
 
 
-add_executable(WeatherApp main.cpp API/WeatherAPI.cpp API/WeatherAPI.h)
+find_package(Qt6 COMPONENTS
+        Core
+        Gui
+        Widgets
+        REQUIRED)
+
+
+add_executable(WeatherApp main.cpp API/WeatherAPI.cpp API/WeatherAPI.h GUI/mainwindow.cpp GUI/mainwindow.h GUI/mainwindow.ui)
 target_link_libraries(WeatherApp ${CURLPP_LDFLAGS})
 target_link_libraries(WeatherApp ${NLOHMANN_LDFLAGS})
+target_link_libraries(WeatherApp
+        Qt::Core
+        Qt::Gui
+        Qt::Widgets
+        )

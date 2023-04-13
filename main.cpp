@@ -5,10 +5,22 @@
 #include <curlpp/cURLpp.hpp>
 #include <curlpp/Options.hpp>
 #include <nlohmann/json.hpp>
+#include <QListView>
+#include <QPushButton>
+#include <QApplication>
+#include "GUI/mainwindow.h"
 
+int main(int argc, char *argv[]) {
 
-int main() {
+    QApplication a(argc, argv);
 
+    MainWindow w;
+
+    w.show();
+
+    return QApplication::exec();
+
+/*
     API::WeatherAPI weatherAPI("c37fc2bf45a37a8ff187e0955ee2e5ef");
 
     std::string location;
@@ -32,7 +44,7 @@ int main() {
     auto data = weatherAPI.getDayData(0);
 
 
-    std::cout << "Today's temperature is: " + std::to_string(data["temp"].get<int>()) + "°C";
+    std::cout << "Today's temperature is: " + std::to_string(data["temp"].get<int>()) + "°C";*/
 
     return 0;
 }
