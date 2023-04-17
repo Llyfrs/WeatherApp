@@ -12,3 +12,23 @@ This project is dependent on the [**curlpp**](http://www.curlpp.org/) and [**nlo
 ### Example
 
 ![Image](https://i.imgur.com/6L2vWmO.png)
+
+
+
+### TODO / Notes 
+
+- Icon API 
+- Geo API 
+- Location Class
+
+# Information to show:
+- wind_speed
+- cloudiness 
+- uv idex
+- feels_like
+- presure
+- humidity
+- sunset / sunrise 
+- curent time 
+- curent weather 
+- 

@@ -3,36 +3,38 @@
 //
 
 #include "WeatherAPI.h"
-
 #include <utility>
 
 // Creates new API object with its own Key
-API::WeatherAPI::WeatherAPI(std::string key): key(std::move(key)), json_data(nlohmann::detail::value_t::null), lat(1),lon(1) {}
+// We are initializing location to fake information in case user forget to set it up
+API::WeatherAPI::WeatherAPI(std::string key): key(std::move(key)), location(0,0,"N/A", "N/A", "N/A") {}
 
-bool API::WeatherAPI::update() {
+API::WeatherAPI::WeatherAPI(std::string key, Location location) : key(std::move(key)), location(std::move(location)) {}
 
-    std::string url = "https://api.openweathermap.org/data/3.0/onecall?lat=" + std::to_string(this->lat) + "&lon=" + std::to_string(this->lon) + "&units=metric&appid=" + this->key;
+Forecast API::WeatherAPI::getForecast() {
 
-    auto data = API::WeatherAPI::makeAPIcall(url);
+    std::string url = "https://api.openweathermap.org/data/3.0/onecall?lat=" + std::to_string(this->location.lat) + "&lon=" + std::to_string(this->location.lon) + "&units=metric&appid=" + this->key;
+
+    auto data = API::makeAPIcall(url);
 
 
     // TODO check for errors in reply and return false if any is detected
 
-    this->json_data = data;
-
-    return true;
+    return Forecast(data);
 }
 
 
-nlohmann::json API::WeatherAPI::getData() {
+
+
+/*nlohmann::json API::WeatherAPI::getData() {
     return this->json_data;
 }
 
-/**
+*//**
  * Return n-th day prediction \n
  * n == 0 returns current weather information's
  * If out of index throws error
- * **/
+ * **//*
 json API::WeatherAPI::getDayData(int n) {
 
     json day;
@@ -49,9 +51,9 @@ json API::WeatherAPI::getDayData(int n) {
 
     throw std::out_of_range("Index out of range");
 
-}
+}*/
 
-std::vector<nlohmann::json> API::WeatherAPI::getLocations(std::string searchedLocation, int limit = 3) {
+/*std::vector<nlohmann::json> API::WeatherAPI::getLocations(std::string searchedLocation, int limit = 3) {
 
 
     // Spaces are not allowed in an url, but they can be represented with dashes (-)
@@ -70,22 +72,16 @@ std::vector<nlohmann::json> API::WeatherAPI::getLocations(std::string searchedLo
     }
 
     return result;
+}*/
+
+
+
+void API::WeatherAPI::setLocation(Location loc) {
+    this->location = loc;
 }
 
-json API::WeatherAPI::makeAPIcall(const std::string& url) {
-
-    std::ostringstream os;
-    os << curlpp::options::Url(url);
-
-    std::string string = os.str();
-
-    auto data = json::parse(string);
-
-    return data;
-
+Location API::WeatherAPI::getLocation() {
+    return this->location;
 }
 
-void API::WeatherAPI::setLocation(double lat, double lon) {
-    this->lat = lat;
-    this->lon = lon;
-}
+

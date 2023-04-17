@@ -1,36 +1,27 @@
 //
 // Created by llyfr on 3/27/23.
 //
-
+#pragma once
 #include <string>
-#include <curlpp/cURLpp.hpp>
-#include <curlpp/Options.hpp>
-#include <nlohmann/json.hpp>
 
-using json = nlohmann::json;
+#include "Forecast.h"
+#include "GeoAPI.h"
 
 namespace API {
 
     class WeatherAPI {
     private:
-        nlohmann::json json_data;
         std::string key;
-        double lat;
-        double lon;
-
-        static json makeAPIcall(const std::string& url);
+        Location location;
 
     public:
 
         explicit WeatherAPI(std::string key);
+        WeatherAPI(std::string key, Location location);
 
-        void setLocation(double, double);
-
-        bool update();
-        json getData();
-        json getDayData(int n);
-
-        std::vector<json> getLocations(std::string, int);
+        Forecast getForecast();
+        void setLocation(Location);
+        Location getLocation();
 
     };
 
