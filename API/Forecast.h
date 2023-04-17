@@ -12,4 +12,7 @@ private:
     nlohmann::json data;
 public:
     explicit Forecast(nlohmann::json data);
+
+
+    int getTemperature();
 };

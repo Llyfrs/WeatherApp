@@ -15,16 +15,23 @@ int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
     MainWindow w;
+
     w.show();
 
 
     auto geoAPI = API::GeoAPI("c37fc2bf45a37a8ff187e0955ee2e5ef");
-
-
     Location loc = geoAPI.getLocation("Nový Jičín");
 
 
-    std::cout << loc.name << " : " << loc.country << "cords: " << loc.lat <<", " << loc.lon << std::endl;
+    auto API = API::WeatherAPI("c37fc2bf45a37a8ff187e0955ee2e5ef",loc);
+
+    auto forecast = API.getForecast();
+
+
+    std::cout << forecast.getTemperature();
+
+
+
 
     return QApplication::exec();
 }
