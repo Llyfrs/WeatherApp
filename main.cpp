@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
     auto forecast = API.getForecast();
 
 
-    std::cout << forecast.getTemperature();
+    std::cout << forecast.getWindSpeed();
 
 
 

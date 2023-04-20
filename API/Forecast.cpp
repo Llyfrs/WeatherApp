@@ -5,16 +5,57 @@
 #include "Forecast.h"
 #include <utility>
 
+
+#include "iostream"
+
 Forecast::Forecast(nlohmann::json data): data(std::move(data)) {
 
+    this->days.push_back(this->data.at("current"));
 
+    for(const auto& day : this->data.at("daily")){
+        this->days.push_back(day);
+    }
 
 }
-
-int Forecast::getTemperature() {
-    return this->data.at("current").at("temp").get<int>();
+/**
+ * @param n - witch days you want temperature form, if not specified defaults to 0 returning temperature for current day
+ * @return int - representing current temperature
+ * */
+int Forecast::getTemperature(unsigned int n /*= 0*/) {
+    return (n == 0) ? this->days[n].at("temp").get<int>() : this->days[n].at("temp").at("day").get<int>();
 }
 
+size_t Forecast::getForecastedDaysCount() {
+    return this->days.size();
+}
+
+int Forecast::getFeelsLikeTemperature(unsigned int n /*= 0*/) {
+    return (n == 0) ? this->days[n].at("feels_like").get<int>() : this->days[n].at("feels_like").at("day").get<int>();
+}
+
+int Forecast::getPressure(unsigned int n /*= 0*/) {
+    return this->days[n].at("pressure").get<int>();
+}
+
+int Forecast::getHumidity(unsigned int n /*= 0*/) {
+    return this->days[n].at("humidity").get<int>();
+}
+
+int Forecast::getUVI(unsigned int n /*= 0*/) {
+    return this->days[n].at("uvi").get<int>();
+}
+
+double Forecast::getWindSpeed(unsigned int n) {
+    return this->days[n].at("wind_speed").get<double>();
+}
+
+double Forecast::getWindGust(unsigned int n) {
+    return this->days[n].at("wind_gust").get<double>();
+}
+
+int Forecast::getWindDegree(unsigned int n) {
+    return this->days[n].at("wind_deg").get<int>();
+}
 
 
 
