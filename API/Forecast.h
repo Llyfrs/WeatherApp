@@ -3,6 +3,13 @@
 //
 #include <nlohmann/json.hpp>
 
+struct Weather{
+    int id;
+    std::string main;
+    std::string description;
+    std::string icon;
+};
+
 
 /*
  * Class used to parse data from json format to solid data types.
@@ -27,5 +34,13 @@ public:
     double getWindSpeed(unsigned int = 0);
     double getWindGust(unsigned int = 0);
     int getWindDegree(unsigned int = 0);
+
+
+
+
+
+    Weather getWeather(unsigned int = 0);
+
+
 
 };

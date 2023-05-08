@@ -4,10 +4,12 @@
 #include <string>
 #include <curlpp/cURLpp.hpp>
 #include <curlpp/Options.hpp>
+#include "curlpp/Easy.hpp"
 #include <nlohmann/json.hpp>
 #include <QListView>
 #include <QPushButton>
 #include <QApplication>
+#include <fstream>
 #include "GUI/mainwindow.h"
 
 int main(int argc, char *argv[]) {
@@ -28,10 +30,9 @@ int main(int argc, char *argv[]) {
     auto forecast = API.getForecast();
 
 
-    std::cout << forecast.getWindSpeed();
+    std::cout << forecast.getWindSpeed() << std::endl;
 
-
-
+    std::cout << forecast.getWeather().icon << std::endl;
 
     return QApplication::exec();
 }

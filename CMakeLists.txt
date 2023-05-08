@@ -18,8 +18,9 @@ find_package(Qt6 COMPONENTS
         Widgets
         REQUIRED)
 
+file(COPY icons DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(WeatherApp main.cpp API/GeoAPI.cpp API/GeoAPI.h API/WeatherAPI.cpp API/WeatherAPI.h GUI/mainwindow.cpp GUI/mainwindow.h API/Forecast.cpp API/Forecast.h)
+add_executable(WeatherApp main.cpp API/GeoAPI.cpp API/GeoAPI.h API/WeatherAPI.cpp API/WeatherAPI.h GUI/mainwindow.cpp GUI/mainwindow.h API/Forecast.cpp API/Forecast.h GUI/settingwindow.cpp GUI/settingwindow.h GUI/settingwindow.ui GUI/settingwindow.cpp GUI/settingwindow.h GUI/settingwindow.ui)
 target_link_libraries(WeatherApp ${CURLPP_LDFLAGS})
 target_link_libraries(WeatherApp ${NLOHMANN_LDFLAGS})
 target_link_libraries(WeatherApp

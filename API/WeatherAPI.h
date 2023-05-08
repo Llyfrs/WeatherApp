@@ -15,7 +15,7 @@ namespace API {
         Location location;
 
     public:
-
+        WeatherAPI() = default;
         explicit WeatherAPI(std::string key);
         WeatherAPI(std::string key, Location location);
 

@@ -7,6 +7,7 @@
 
 #include <QWidget>
 #include <QMainWindow>
+#include "../API/WeatherAPI.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -27,9 +28,16 @@ private:
     Ui::MainWindow *ui;
 
     QAction* exitAction;
+    QAction* settingsAction;
+
+
+    API::WeatherAPI weatherAPI;
+    API::GeoAPI geoAPI;
 
 public slots:
     void exit();
+    void openSettings();
+    void openDay();
     void update();
 
 };

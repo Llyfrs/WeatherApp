@@ -10,6 +10,8 @@
 #include "nlohmann/json.hpp"
 #include <curlpp/cURLpp.hpp>
 #include <curlpp/Options.hpp>
+#include <curlpp/Easy.hpp>
+
 
 
 struct Location {
@@ -31,12 +33,15 @@ namespace API {
 
     nlohmann::json makeAPIcall(const std::string& url);
 
+    std::stringstream getImageFromUrl(const std::string& url);
+
     class GeoAPI {
 
     private:
         std::string key;
 
     public:
+        GeoAPI() = default;
         explicit GeoAPI(std::string key);
 
         Location getLocation(std::string);

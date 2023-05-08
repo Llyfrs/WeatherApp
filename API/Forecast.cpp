@@ -59,6 +59,29 @@ int Forecast::getWindDegree(unsigned int n) {
 
 
 
+Weather Forecast::getWeather(unsigned int n) {
+    Weather weather;
+
+    // I don't know why weather is returned as array, but it is.
+    nlohmann::json weather_json = this->days[n].at("weather")[0];
+
+    weather.id = weather_json.at("id").get<int>();
+    weather.main = weather_json.at("main").get<std::string>();
+    weather.description = weather_json.at("description").get<std::string>();
+
+    // The API allows you to specify the size of the icon, but it only seems to support only 2x and 4x and I will always need 4x.
+    weather.icon = "https://openweathermap.org/img/wn/" + weather_json.at("icon").get<std::string>() + "@4x.png";
+
+    return weather;
+}
+
+
+
+
+
+
+
+
 /*
  *
  *
