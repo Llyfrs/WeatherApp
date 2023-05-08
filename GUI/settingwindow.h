@@ -28,7 +28,7 @@ public slots:
     void cancel();
 
     void cityEntered();
-    void citySelected(const QString& string);
+
 };
 
 

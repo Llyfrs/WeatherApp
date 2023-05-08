@@ -7,6 +7,7 @@
 #include <iostream>
 #include <QSettings>
 #include <QCompleter>
+#include <QStringListModel>
 #include "settingwindow.h"
 #include "ui_settingwindow.h"
 #include "../API/GeoAPI.h"
@@ -21,6 +22,29 @@ SettingWindow::SettingWindow(QWidget *parent) :
 
     connect(ui->cityEnter, &QLineEdit::returnPressed, this, &SettingWindow::cityEntered);
 
+    connect(ui->city, &QRadioButton::toggled, this, [this]() {
+        ui->lat->setDisabled(true);
+        ui->lon->setDisabled(true);
+        ui->label_5->setDisabled(true);
+        ui->label_6->setDisabled(true);
+
+        ui->cityEnter->setDisabled(false);
+        ui->label_4->setDisabled(false);
+    });
+
+    connect(ui->cords, &QRadioButton::toggled, this, [this]() {
+        ui->lat->setDisabled(false);
+        ui->lon->setDisabled(false);
+        ui->label_5->setDisabled(false);
+        ui->label_6->setDisabled(false);
+
+        ui->cityEnter->setDisabled(true);
+        ui->label_4->setDisabled(true);
+    });
+
+
+    ui->API_key->setEchoMode(QLineEdit::Password);
+
 
     QSettings settings;
 
@@ -32,6 +56,9 @@ SettingWindow::SettingWindow(QWidget *parent) :
     ui->celsius->setChecked(settings.value("units", "standard").toString() == "metric");
     ui->city->setChecked(settings.value("location_type", "coordinates").toString() == "city");
     ui->cords->setChecked(settings.value("location_type", "coordinates").toString() == "coordinates");
+    ui->lat->setText(settings.value("location_lat", "").toString());
+    ui->lon->setText(settings.value("location_lon", "").toString());
+    ui->cityEnter->setText(settings.value("location_name", "").toString());
 
 }
 
@@ -60,7 +87,10 @@ void SettingWindow::save() {
     settings.setValue("update_interval", ui->spinBox_update->value());
     settings.setValue("update_unit", ui->comboBox_update->currentText());
 
+    settings.setValue("location_lat", ui->lat->text());
+    settings.setValue("location_lon", ui->lon->text());
 
+    settings.setValue("location_name", ui->cityEnter->text());
 
 
     this->close();
@@ -84,7 +114,10 @@ void SettingWindow::cityEntered() {
     QStringList wordList;
 
     for (auto &i : loc) {
-        wordList.append(QString::fromStdString(i.name));
+
+        std::string name =  i.name + ", " + i.country;
+
+        wordList.append(QString::fromStdString(name));
         std::cout << i.name << std::endl;
         std::cout << i.country << std::endl;
     }
@@ -96,15 +129,22 @@ void SettingWindow::cityEntered() {
     ui->cityEnter->setCompleter(completer);
     completer->complete();
 
-    connect(completer, QOverload<const QString &>::of(&QCompleter::activated),
-            this, &SettingWindow::citySelected);
+    connect(completer, QOverload<const QModelIndex&>::of(&QCompleter::activated),
+            this, [this,loc,completer](const QModelIndex &choice){
 
+            QSettings settings;
+
+            settings.setValue("location_lat", loc[choice.row()].lat);
+            settings.setValue("location_lon", loc[choice.row()].lon);
+
+            ui->lon->setText(QString::fromStdString(std::to_string(loc[choice.row()].lon)));
+            ui->lat->setText(QString::fromStdString(std::to_string(loc[choice.row()].lat)));
+
+            std::cout << choice.row() << std::endl;
+
+            ui->cityEnter->setCompleter(nullptr);
+    });
 
 
 }
 
-void SettingWindow::citySelected(const QString& string) {
-
-    std::cout << string.toStdString() << std::endl;
-
-}
