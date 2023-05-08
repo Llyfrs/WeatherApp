@@ -29,6 +29,8 @@ public slots:
 
     void cityEntered();
 
+    void APIEntered();
+
 };
 
 

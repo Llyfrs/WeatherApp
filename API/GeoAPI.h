@@ -47,6 +47,8 @@ namespace API {
         Location getLocation(std::string);
         std::vector<Location> getLocations(std::string, int);
 
+        bool testAPIkey();
+
     };
 }
 

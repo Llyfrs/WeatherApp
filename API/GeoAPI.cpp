@@ -92,6 +92,20 @@ std::vector<Location> API::GeoAPI::getLocations(std::string searchedLocation, in
     return locations;
 }
 
+bool API::GeoAPI::testAPIkey() {
+
+    auto data = makeAPIcall("https://api.openweathermap.org/geo/1.0/direct?q=London&appid=" + this->key);
+
+    if(data.is_array()) {
+        return true;
+    }
+
+    if (data.value("cod", 0) != 401)
+        return true;
+
+    return false;
+}
+
 
 nlohmann::json API::makeAPIcall(const std::string& url) {
 

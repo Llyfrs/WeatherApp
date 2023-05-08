@@ -22,6 +22,8 @@ SettingWindow::SettingWindow(QWidget *parent) :
 
     connect(ui->cityEnter, &QLineEdit::returnPressed, this, &SettingWindow::cityEntered);
 
+    connect(ui->API_Enter, &QPushButton::clicked, this, &SettingWindow::APIEntered);
+
     connect(ui->city, &QRadioButton::toggled, this, [this]() {
         ui->lat->setDisabled(true);
         ui->lon->setDisabled(true);
@@ -44,14 +46,15 @@ SettingWindow::SettingWindow(QWidget *parent) :
 
 
     ui->API_key->setEchoMode(QLineEdit::Password);
+    ui->errorMessage->hide();
 
 
     QSettings settings;
 
 
     ui->API_key->setText(settings.value("API_key", "").toString());
-    ui->spinBox_update->setValue(settings.value("update_interval", 1).toInt());
-    ui->comboBox_update->setCurrentText(settings.value("update_unit", "seconds").toString());
+    ui->spinBox_update->setValue(settings.value("update_interval", 2).toInt());
+    ui->comboBox_update->setCurrentText(settings.value("update_unit", "minutes").toString());
     ui->fahrenheit->setChecked(settings.value("units", "standard").toString() == "imperial");
     ui->celsius->setChecked(settings.value("units", "standard").toString() == "metric");
     ui->city->setChecked(settings.value("location_type", "coordinates").toString() == "city");
@@ -145,6 +148,29 @@ void SettingWindow::cityEntered() {
             ui->cityEnter->setCompleter(nullptr);
     });
 
+
+}
+
+void SettingWindow::APIEntered() {
+
+    QString API_key = ui->API_key->text();
+
+    API::GeoAPI geoAPI(API_key.toStdString());
+
+    if(geoAPI.testAPIkey()) {
+        ui->errorMessage->setText("API key is valid");
+        ui->errorMessage->setStyleSheet("QLabel { color : green; }");
+        ui->errorMessage->show();
+
+        QSettings settings;
+
+        settings.setValue("API_key", API_key);
+
+    } else {
+        ui->errorMessage->setText("API key is invalid");
+        ui->errorMessage->setStyleSheet("QLabel { color : red; }");
+        ui->errorMessage->show();
+    }
 
 }
 
