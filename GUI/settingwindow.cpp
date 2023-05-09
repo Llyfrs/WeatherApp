@@ -21,9 +21,10 @@ SettingWindow::SettingWindow(QWidget *parent) :
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &SettingWindow::cancel);
 
     connect(ui->cityEnter, &QLineEdit::returnPressed, this, &SettingWindow::cityEntered);
-
     connect(ui->API_Enter, &QPushButton::clicked, this, &SettingWindow::APIEntered);
 
+
+    // I have it as a lambda function because its pure UI settings witch is what this constructor is for
     connect(ui->city, &QRadioButton::toggled, this, [this]() {
         ui->lat->setDisabled(true);
         ui->lon->setDisabled(true);
@@ -45,6 +46,7 @@ SettingWindow::SettingWindow(QWidget *parent) :
     });
 
 
+    // Didn't manage to set it up in QT designer so I have to do it here, might delete latter;
     ui->API_key->setEchoMode(QLineEdit::Password);
     ui->errorMessage->hide();
 
@@ -85,7 +87,7 @@ void SettingWindow::save() {
     }
 
 
-    settings.setValue("API_key", ui->API_key->text());
+    // I'm not saving API key and only having that saved when it's confirmed it's valid using the enter button;
 
     settings.setValue("update_interval", ui->spinBox_update->value());
     settings.setValue("update_unit", ui->comboBox_update->currentText());
@@ -95,7 +97,7 @@ void SettingWindow::save() {
 
     settings.setValue("location_name", ui->cityEnter->text());
 
-
+    emit settingsSaved();
     this->close();
 
 }
@@ -110,7 +112,15 @@ SettingWindow::~SettingWindow() {
 
 void SettingWindow::cityEntered() {
 
-    API::GeoAPI geoAPI("c37fc2bf45a37a8ff187e0955ee2e5ef");
+    QSettings settings;
+
+    std::string key = settings.value("API_key", "").toString().toStdString();
+
+    if(key.empty()) {
+        return;
+    }
+
+    API::GeoAPI geoAPI(key);
 
     std::vector<Location> loc = geoAPI.getLocations(ui->cityEnter->text().toStdString(), 10);
 
@@ -121,8 +131,6 @@ void SettingWindow::cityEntered() {
         std::string name =  i.name + ", " + i.country;
 
         wordList.append(QString::fromStdString(name));
-        std::cout << i.name << std::endl;
-        std::cout << i.country << std::endl;
     }
 
 
@@ -145,15 +153,22 @@ void SettingWindow::cityEntered() {
 
             std::cout << choice.row() << std::endl;
 
+            // Disables completer, so the results don't show if user wants to enter different location
             ui->cityEnter->setCompleter(nullptr);
     });
 
 
 }
 
+
+// We are testing if the API key is valid
+// This is the only place where we set API key in to settings
+// So this makes sure the API key is either valid or empty string.
 void SettingWindow::APIEntered() {
 
     QString API_key = ui->API_key->text();
+
+    QSettings settings;
 
     API::GeoAPI geoAPI(API_key.toStdString());
 
@@ -162,14 +177,19 @@ void SettingWindow::APIEntered() {
         ui->errorMessage->setStyleSheet("QLabel { color : green; }");
         ui->errorMessage->show();
 
-        QSettings settings;
-
         settings.setValue("API_key", API_key);
+
+        emit settingsSaved();
 
     } else {
         ui->errorMessage->setText("API key is invalid");
         ui->errorMessage->setStyleSheet("QLabel { color : red; }");
         ui->errorMessage->show();
+
+        settings.setValue("API_key", "");
+
+        emit settingsSaved();
+
     }
 
 }

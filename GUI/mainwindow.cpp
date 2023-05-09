@@ -8,6 +8,8 @@
 #include  <QTimer>
 #include <iostream>
 #include <fstream>
+#include <QSettings>
+#include <QtConcurrent/QtConcurrent>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "../API/WeatherAPI.h"
@@ -69,14 +71,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
      QObject::connect(timer, &QTimer::timeout, this, &MainWindow::update);
 
+
+     QSettings settings;
+
+     std::map<QString, int> converter = {
+             {"hours", 3600},
+             {"minutes", 60 },
+             {"seconds", 1}
+     };
+
      // TODO loads from user settings, or hour by default
-     int hour = 1000 * 60 * 60;
-     timer->start(hour);
+     int interval = 1000 * settings.value("updateInterval", 2).toInt() * converter[settings.value("updateIntervalUnit", "minutes").toString()];
+     timer->start(interval);
 
 
-     this->update();
+     QtConcurrent::run([this](){this->update();});
 
      this->openSettings();
+
 
 }
 
@@ -91,11 +103,14 @@ void MainWindow::exit() {
 }
 
 /**
- *
+ * Updates all the UI elements.
+ * Is getting run as a separate thread so developer should keep that in mind.
+ * QSetting is tread safe according to the documentation
  */
 
 void MainWindow::update() {
     std::cout << "Update Started" << std::endl;
+    QCoreApplication::processEvents();
 
 
     auto forecast = this->weatherAPI.getForecast();
@@ -127,6 +142,11 @@ void MainWindow::openSettings() {
     settings->setWindowModality(Qt::ApplicationModal);
     settings->show();
     settings->raise();
+
+
+    // Prevents freeze when closing the setting window
+    // ! Must be kept in mind, we just introduced a threading in to our program;
+    connect(settings, &SettingWindow::settingsSaved, [this](){QtConcurrent::run([this](){this->update();});});
 
 }
 
