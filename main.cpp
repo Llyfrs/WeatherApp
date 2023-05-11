@@ -29,6 +29,13 @@ int main(int argc, char *argv[]) {
 
     auto forecast = API.getForecast();
 
+    forecast.getHourlyForecast();
+
+    std::cout << forecast.getHourlyForecast().temperature << std::endl;
+    std::cout << forecast.getDailyForecast(1).temperature.day << std::endl;
+
+
+
 
     std::cout << forecast.getWindSpeed() << std::endl;
 

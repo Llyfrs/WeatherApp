@@ -14,6 +14,7 @@
 #include "ui_mainwindow.h"
 #include "../API/WeatherAPI.h"
 #include "settingwindow.h"
+#include "history.h"
 
 
 QPixmap stringStreamToPixmap(std::stringstream stream) {
@@ -41,11 +42,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     QCoreApplication::setApplicationName("Weather App");
 
 
-    this->geoAPI = API::GeoAPI("c37fc2bf45a37a8ff187e0955ee2e5ef");
-    Location loc = geoAPI.getLocation("Nový Jičín");
-
-    this->weatherAPI = API::WeatherAPI("c37fc2bf45a37a8ff187e0955ee2e5ef",loc);
-
     /*
     * Create menu bar
     * */
@@ -54,14 +50,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     this->exitAction = new QAction("Exit", this);
     this->settingsAction = new QAction("Settings", this);
+    this->historyAction = new QAction("History", this);
 
 
     QObject::connect(this->exitAction, &QAction::triggered, this, &MainWindow::exit);
     QObject::connect(this->settingsAction, &QAction::triggered, this, &MainWindow::openSettings);
+    QObject::connect(this->historyAction, &QAction::triggered, this, &MainWindow::openHistory);
 
 
     fileMenu->addAction(this->settingsAction);
+    fileMenu->addAction(this->historyAction);
     fileMenu->addAction(this->exitAction);
+
 
 
     /*
@@ -87,8 +87,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
      QtConcurrent::run([this](){this->update();});
 
-     this->openSettings();
+     //this->openSettings();
 
+     this->openHistory();
 
 }
 
@@ -110,20 +111,39 @@ void MainWindow::exit() {
 
 void MainWindow::update() {
     std::cout << "Update Started" << std::endl;
-    QCoreApplication::processEvents();
 
 
-    auto forecast = this->weatherAPI.getForecast();
+    QSettings settings;
+
+    QString API_key = settings.value("API_key", "").toString();
+
+    if (API_key == "") {
+        std::cout << "API key not set" << std::endl;
+        return;
+    }
+
+    Location loc;
+    loc.lat = settings.value("location_lat").toDouble();
+    loc.lon = settings.value("location_lon").toDouble();
+
+    API::WeatherAPI weatherAPI(API_key.toStdString(), loc);
+
+
+    auto forecast = weatherAPI.getForecast();
 
     std::vector<QLabel*> icons = {ui->mainIcon, ui->icon_1, ui->icon_2, ui->icon_3, ui->icon_4, ui->icon_5};
     std::vector<QLabel*> temps = {ui->mainTemp, ui->temp_1, ui->temp_2, ui->temp_3, ui->temp_4, ui->temp_5};
 
 
     for(int i = 0 ; i < 6; i++) {
-        QPixmap pixmap = stringStreamToPixmap(API::getImageFromUrl(forecast.getWeather(i).icon));
+
+        std::string icon = (i == 0) ? forecast.getHourlyForecast(i).weather.icon : forecast.getDailyForecast(i).weather.icon;
+        int temp = (i == 0) ? forecast.getHourlyForecast(i).temperature : forecast.getDailyForecast(i).temperature.day;
+
+        QPixmap pixmap = stringStreamToPixmap(API::getImageFromUrl(icon));
         icons[i]->setPixmap(pixmap);
 
-        temps[i]->setText(QString::number(forecast.getTemperature(i)) + "°C");
+        temps[i]->setText(QString::number(temp) + "°C");
 
     }
 
@@ -152,6 +172,15 @@ void MainWindow::openSettings() {
 
 
 void MainWindow::openDay() {
+
+}
+
+void MainWindow::openHistory() {
+
+    auto* history = new History();
+
+    history->setWindowModality(Qt::ApplicationModal);
+    history->show();
 
 }
 

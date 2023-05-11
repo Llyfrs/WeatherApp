@@ -7,6 +7,7 @@
 #include <iostream>
 #include <QSettings>
 #include <QCompleter>
+#include <QLocale>
 #include <QStringListModel>
 #include "settingwindow.h"
 #include "ui_settingwindow.h"
@@ -23,6 +24,8 @@ SettingWindow::SettingWindow(QWidget *parent) :
     connect(ui->cityEnter, &QLineEdit::returnPressed, this, &SettingWindow::cityEntered);
     connect(ui->API_Enter, &QPushButton::clicked, this, &SettingWindow::APIEntered);
 
+    connect(ui->lat, &QLineEdit::returnPressed, this, &SettingWindow::cordsEntered);
+    connect(ui->lon, &QLineEdit::returnPressed, this, &SettingWindow::cordsEntered);
 
     // I have it as a lambda function because its pure UI settings witch is what this constructor is for
     connect(ui->city, &QRadioButton::toggled, this, [this]() {
@@ -50,6 +53,12 @@ SettingWindow::SettingWindow(QWidget *parent) :
     ui->API_key->setEchoMode(QLineEdit::Password);
     ui->errorMessage->hide();
 
+    auto * validator = new QDoubleValidator(-99999999.0, 99999999.0, 5);
+    auto locale = QLocale(QLocale::English, QLocale::UnitedStates);  // Use '.' as decimal separator
+    validator->setLocale(locale);
+    ui->lat->setValidator(validator);
+    ui->lon->setValidator(validator);
+
 
     QSettings settings;
 
@@ -61,8 +70,8 @@ SettingWindow::SettingWindow(QWidget *parent) :
     ui->celsius->setChecked(settings.value("units", "standard").toString() == "metric");
     ui->city->setChecked(settings.value("location_type", "coordinates").toString() == "city");
     ui->cords->setChecked(settings.value("location_type", "coordinates").toString() == "coordinates");
-    ui->lat->setText(settings.value("location_lat", "").toString());
-    ui->lon->setText(settings.value("location_lon", "").toString());
+    ui->lat->setText(settings.value("location_lat", 0).toString());
+    ui->lon->setText(settings.value("location_lon", 0).toString());
     ui->cityEnter->setText(settings.value("location_name", "").toString());
 
 }
@@ -148,8 +157,8 @@ void SettingWindow::cityEntered() {
             settings.setValue("location_lat", loc[choice.row()].lat);
             settings.setValue("location_lon", loc[choice.row()].lon);
 
-            ui->lon->setText(QString::fromStdString(std::to_string(loc[choice.row()].lon)));
-            ui->lat->setText(QString::fromStdString(std::to_string(loc[choice.row()].lat)));
+            ui->lon->setText(QString::number(loc[choice.row()].lon));
+            ui->lat->setText(QString::number(loc[choice.row()].lat));
 
             std::cout << choice.row() << std::endl;
 
@@ -159,6 +168,28 @@ void SettingWindow::cityEntered() {
 
 
 }
+
+void SettingWindow::cordsEntered() {
+
+    QSettings settings;
+
+    std::string key = settings.value("API_key", "").toString().toStdString();
+
+    if(key.empty()) {
+        return;
+    }
+
+    API::GeoAPI geoAPI(key);
+
+    double lat = ui->lat->text().toDouble();
+    double lon = ui->lon->text().toDouble();
+
+    Location loc = geoAPI.getLocation(lat, lon);
+
+    ui->cityEnter->setText(QString::fromStdString(loc.name + ", " + loc.country));
+
+}
+
 
 
 // We are testing if the API key is valid
@@ -193,4 +224,5 @@ void SettingWindow::APIEntered() {
     }
 
 }
+
 

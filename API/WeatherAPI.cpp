@@ -15,6 +15,9 @@ Forecast API::WeatherAPI::getForecast() {
 
     std::string url = "https://api.openweathermap.org/data/3.0/onecall?lat=" + std::to_string(this->location.lat) + "&lon=" + std::to_string(this->location.lon) + "&units=metric&appid=" + this->key;
 
+
+    std::cout << url << std::endl;
+
     auto data = API::makeAPIcall(url);
 
 

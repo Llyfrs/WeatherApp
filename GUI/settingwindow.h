@@ -28,6 +28,7 @@ public slots:
     void cancel();
 
     void cityEntered();
+    void cordsEntered();
 
     void APIEntered();
 

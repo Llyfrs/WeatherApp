@@ -10,8 +10,6 @@
 
 Forecast::Forecast(nlohmann::json data): data(std::move(data)) {
 
-    this->days.push_back(this->data.at("current"));
-
     for(const auto& day : this->data.at("daily")){
         this->days.push_back(day);
     }
@@ -22,7 +20,7 @@ Forecast::Forecast(nlohmann::json data): data(std::move(data)) {
  * @return int - representing current temperature
  * */
 int Forecast::getTemperature(unsigned int n /*= 0*/) {
-    return (n == 0) ? this->days[n].at("temp").get<int>() : this->days[n].at("temp").at("day").get<int>();
+    return this->days[n].at("temp").at("day").get<int>();
 }
 
 size_t Forecast::getForecastedDaysCount() {
@@ -30,7 +28,7 @@ size_t Forecast::getForecastedDaysCount() {
 }
 
 int Forecast::getFeelsLikeTemperature(unsigned int n /*= 0*/) {
-    return (n == 0) ? this->days[n].at("feels_like").get<int>() : this->days[n].at("feels_like").at("day").get<int>();
+    return this->days[n].at("feels_like").at("day").get<int>();
 }
 
 int Forecast::getPressure(unsigned int n /*= 0*/) {
@@ -74,6 +72,118 @@ Weather Forecast::getWeather(unsigned int n) {
 
     return weather;
 }
+
+
+/**
+ * Returns weather for current day on specified hour.
+ * If n is zero will return current weather.
+ * @param n
+ * @return
+ */
+HourlyForecast Forecast::getHourlyForecast(unsigned int n) {
+    HourlyForecast hourlyWeather;
+
+    nlohmann::json hourlyWeatherJson;
+
+    if(n == 0)
+        hourlyWeatherJson = this->data.at("current");
+    else
+        hourlyWeatherJson = this->data.at("hourly")[n];
+
+
+    hourlyWeather.temperature = hourlyWeatherJson.value("temp", 0.0);
+    hourlyWeather.feels_like = hourlyWeatherJson.value("feels_like", 0.0);
+
+    hourlyWeather.atmospheric = mapAtmospheric(hourlyWeatherJson);
+    hourlyWeather.wind = mapWind(hourlyWeatherJson);
+    hourlyWeather.weather = mapWeather(hourlyWeatherJson.at("weather")[0]);
+
+    return hourlyWeather;
+}
+
+DailyForecast Forecast::getDailyForecast(unsigned int n) {
+    DailyForecast dailyForecast;
+
+    dailyForecast.atmospheric = mapAtmospheric(this->days[n]);
+    dailyForecast.weather = mapWeather(this->days[n].at("weather")[0]);
+    dailyForecast.wind = mapWind(this->days[n]);
+    dailyForecast.time = mapUnixTime(this->days[n]);
+    dailyForecast.temperature = mapTemperature(this->days[n]);
+
+
+    return dailyForecast;
+}
+
+
+Weather Forecast::mapWeather(const nlohmann::json& weather_json) {
+
+    Weather weather;
+
+    weather.id = weather_json.value("id", 0);
+    weather.main = weather_json.value("main", "");
+    weather.description = weather_json.value("description", "");
+
+    // The API allows you to specify the size of the icon, but it only seems to support only 2x and 4x and I will always need 4x.
+    weather.icon = "https://openweathermap.org/img/wn/" + weather_json.value("icon","01d") + "@4x.png";
+
+    return weather;
+
+}
+
+
+Wind Forecast::mapWind(const nlohmann::json& wind_json) {
+    Wind wind{};
+
+    wind.gust = wind_json.value("wind_gust", 0.0);
+    wind.speed = wind_json.value("wind_speed", 0.0);
+    wind.degree = wind_json.value("wind_deg", 0);
+
+    return wind;
+}
+
+Atmospheric Forecast::mapAtmospheric(const nlohmann::json& atmospheric_json) {
+    Atmospheric atmospheric{};
+
+    atmospheric.pressure = atmospheric_json.value("pressure", 0);
+    atmospheric.humidity = atmospheric_json.value("humidity", 0);
+    atmospheric.visibility = atmospheric_json.value("visibility", 0);
+    atmospheric.clouds = atmospheric_json.value("clouds", 0);
+    atmospheric.uvi = atmospheric_json.value("uvi", 0.0);
+
+    return atmospheric;
+}
+
+Temperature Forecast::mapTemperature(const nlohmann::json& temperature_json) {
+    Temperature temperature{};
+
+    temperature.day = temperature_json.at("temp").value("day", 0.0);
+    temperature.min = temperature_json.at("temp").value("min", 0.0);
+    temperature.max = temperature_json.at("temp").value("max", 0.0);
+    temperature.night = temperature_json.at("temp").value("night", 0.0);
+    temperature.eve = temperature_json.at("temp").value("eve", 0.0);
+
+    temperature.feels_like_day = temperature_json.at("feels_like").value("day", 0.0);
+    temperature.feels_like_night = temperature_json.at("feels_like").value("night", 0.0);
+    temperature.feels_like_eve = temperature_json.at("feels_like").value("eve", 0.0);
+    temperature.feels_like_morn = temperature_json.at("feels_like").value("morn", 0.0);
+
+    return temperature;
+}
+
+UnixTime Forecast::mapUnixTime(const nlohmann::json& unixTime_json) {
+    UnixTime unixTime{};
+
+    unixTime.sunrise = unixTime_json.value("sunrise", 0);
+    unixTime.sunset = unixTime_json.value("sunset", 0);
+    unixTime.dt = unixTime_json.value("dt", 0);
+    unixTime.moonrise = unixTime_json.value("moonrise", 0);
+    unixTime.moonset = unixTime_json.value("moonset", 0);
+    unixTime.moon_phase = unixTime_json.value("moon_phase", 0.0);
+
+    return unixTime;
+}
+
+
 
 
 

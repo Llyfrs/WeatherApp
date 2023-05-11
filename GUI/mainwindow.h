@@ -29,14 +29,12 @@ private:
 
     QAction* exitAction;
     QAction* settingsAction;
-
-
-    API::WeatherAPI weatherAPI;
-    API::GeoAPI geoAPI;
+    QAction* historyAction;
 
 public slots:
     void exit();
     void openSettings();
+    void openHistory();
     void openDay();
     void update();
 

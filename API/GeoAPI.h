@@ -44,8 +44,11 @@ namespace API {
         GeoAPI() = default;
         explicit GeoAPI(std::string key);
 
-        Location getLocation(std::string);
-        std::vector<Location> getLocations(std::string, int);
+        Location getLocation(const std::string&);
+        Location getLocation(double, double);
+
+        std::vector<Location> getLocations(double, double, int );
+        std::vector<Location> getLocations(const std::string&, int);
 
         bool testAPIkey();
 

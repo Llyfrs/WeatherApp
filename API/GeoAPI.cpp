@@ -37,39 +37,51 @@ std::string url_encode(const std::string &value) {
 
 
 
-Location API::GeoAPI::getLocation(std::string searchedLocation) {
 
 
-    // Spaces are not allowed in an url, but they can be represented with dashes (-)
-    std::replace(searchedLocation.begin(),searchedLocation.end(), ' ', '-');
 
-
-    std::string url = "https://api.openweathermap.org/geo/1.0/direct?q=" + searchedLocation + "&appid=" + this->key;
-
-    auto locations = API::makeAPIcall(url)[0];
-
-
-    // TODO Make sure the returned value is correct, and not empty
-
-    Location location;
-
-    location.lat = locations.at("lat").get<double>();
-    location.lon = locations.at("lon").get<double>();
-    location.country = locations.at("country").get<std::string>();
-    location.name = locations.at("name").get<std::string>();
-    location.state = locations.value("state", "N/A");
-
-    return location;
-}
-
-
-std::vector<Location> API::GeoAPI::getLocations(std::string searchedLocation, int limit) {
+std::vector<Location> API::GeoAPI::getLocations(const std::string& searchedLocation, int limit) {
 
     std::vector<Location> locations;
 
     //std::replace(searchedLocation.begin(),searchedLocation.end(), ' ', '-');
 
     std::string url = "https://api.openweathermap.org/geo/1.0/direct?q=" + url_encode(searchedLocation) + "&limit=" + std::to_string(limit) + "&appid=" + this->key;
+
+    std::cout << url << std::endl;
+
+    auto data = API::makeAPIcall(url);
+
+    for(auto location : data) {
+        Location loc;
+        loc.lat = location.at("lat").get<double>();
+        loc.lon = location.at("lon").get<double>();
+        loc.country = location.at("country").get<std::string>();
+        loc.name = location.at("name").get<std::string>();
+        loc.state = location.value("state", "N/A");
+
+        locations.push_back(loc);
+    }
+
+    return locations;
+}
+
+Location API::GeoAPI::getLocation(const std::string& searchedLocation) {
+    std::vector<Location> locations = this->getLocations(searchedLocation, 1);
+    if(locations.empty())
+        throw std::runtime_error("No location found");
+    return locations[0];
+
+}
+
+
+std::vector<Location> API::GeoAPI::getLocations(double lat, double lon, int limit) {
+
+    std::vector<Location> locations;
+
+
+    std::string url = "https://api.openweathermap.org/geo/1.0/reverse?lat=" + std::to_string(lat) + "&lon=" +
+                              std::to_string(lon) + "&limit=" + std::to_string(limit) + "&appid=" + this->key;
 
 
     std::cout << url << std::endl;
@@ -88,9 +100,13 @@ std::vector<Location> API::GeoAPI::getLocations(std::string searchedLocation, in
     }
 
 
-
     return locations;
 }
+
+Location API::GeoAPI::getLocation(double lat, double lon) {
+    return this->getLocations(lat,lon,1)[0];
+}
+
 
 bool API::GeoAPI::testAPIkey() {
 
@@ -105,6 +121,8 @@ bool API::GeoAPI::testAPIkey() {
 
     return false;
 }
+
+
 
 
 nlohmann::json API::makeAPIcall(const std::string& url) {
