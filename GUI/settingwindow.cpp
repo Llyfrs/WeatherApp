@@ -53,11 +53,16 @@ SettingWindow::SettingWindow(QWidget *parent) :
     ui->API_key->setEchoMode(QLineEdit::Password);
     ui->errorMessage->hide();
 
-    auto * validator = new QDoubleValidator(-99999999.0, 99999999.0, 5);
+
+    // Prevents user to write more than 5 decimal places but not number bigger that bottom / top
+    // in those cases it just prevents from enter being pressed, witch isn't great;
+    auto* latValidator = new QDoubleValidator(-90.0, 90.0, 5);
+    auto* lonValidator = new QDoubleValidator(-180, 180, 5);
     auto locale = QLocale(QLocale::English, QLocale::UnitedStates);  // Use '.' as decimal separator
-    validator->setLocale(locale);
-    ui->lat->setValidator(validator);
-    ui->lon->setValidator(validator);
+    latValidator->setLocale(locale);
+    lonValidator->setLocale(locale);
+    ui->lat->setValidator(latValidator);
+    ui->lon->setValidator(lonValidator);
 
 
     QSettings settings;
@@ -68,6 +73,7 @@ SettingWindow::SettingWindow(QWidget *parent) :
     ui->comboBox_update->setCurrentText(settings.value("update_unit", "minutes").toString());
     ui->fahrenheit->setChecked(settings.value("units", "standard").toString() == "imperial");
     ui->celsius->setChecked(settings.value("units", "standard").toString() == "metric");
+    ui->kelvin->setChecked(settings.value("units", "standard").toString() == "standard");
     ui->city->setChecked(settings.value("location_type", "coordinates").toString() == "city");
     ui->cords->setChecked(settings.value("location_type", "coordinates").toString() == "coordinates");
     ui->lat->setText(settings.value("location_lat", 0).toString());
@@ -101,8 +107,13 @@ void SettingWindow::save() {
     settings.setValue("update_interval", ui->spinBox_update->value());
     settings.setValue("update_unit", ui->comboBox_update->currentText());
 
-    settings.setValue("location_lat", ui->lat->text());
-    settings.setValue("location_lon", ui->lon->text());
+    double lat = ui->lat->text().toDouble();
+    double lon = ui->lon->text().toDouble();
+
+    if (! (lat > 90 || lat < -90 || lon > 180 || lon < -180)) {
+        settings.setValue("location_lat", ui->lat->text());
+        settings.setValue("location_lon", ui->lon->text());
+    }
 
     settings.setValue("location_name", ui->cityEnter->text());
 
@@ -154,15 +165,15 @@ void SettingWindow::cityEntered() {
 
             QSettings settings;
 
-            settings.setValue("location_lat", loc[choice.row()].lat);
-            settings.setValue("location_lon", loc[choice.row()].lon);
+            settings.setValue("location_lat", loc[choice.row()].cords.lat);
+            settings.setValue("location_lon", loc[choice.row()].cords.lon);
 
-            ui->lon->setText(QString::number(loc[choice.row()].lon));
-            ui->lat->setText(QString::number(loc[choice.row()].lat));
+            ui->lon->setText(QString::number(loc[choice.row()].cords.lon));
+            ui->lat->setText(QString::number(loc[choice.row()].cords.lat));
 
             std::cout << choice.row() << std::endl;
 
-            // Disables completer, so the results don't show if user wants to enter different location
+            // Disables completer, so the results don't show if user wants to enter different cords
             ui->cityEnter->setCompleter(nullptr);
     });
 
@@ -181,12 +192,22 @@ void SettingWindow::cordsEntered() {
 
     API::GeoAPI geoAPI(key);
 
-    double lat = ui->lat->text().toDouble();
-    double lon = ui->lon->text().toDouble();
 
-    Location loc = geoAPI.getLocation(lat, lon);
+    Cords cords(ui->lat->text().toDouble(), ui->lon->text().toDouble());
 
-    ui->cityEnter->setText(QString::fromStdString(loc.name + ", " + loc.country));
+    if (cords.lat > 90 || cords.lat < -90 || cords.lon > 180 || cords.lon < -180) {
+        return;
+    }
+
+    auto locations = geoAPI.getLocations(cords,1);
+
+    if(locations.empty()) {
+        ui->cityEnter->setText(QString("Lat: " + QString::number(cords.lat) + " Lon: " + QString::number(cords.lon)));
+    } else {
+        auto loc = locations[0];
+        ui->cityEnter->setText(QString::fromStdString(loc.name + ", " + loc.country));
+    }
+
 
 }
 

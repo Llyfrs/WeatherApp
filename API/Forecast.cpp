@@ -15,70 +15,21 @@ Forecast::Forecast(nlohmann::json data): data(std::move(data)) {
     }
 
 }
-/**
- * @param n - witch days you want temperature form, if not specified defaults to 0 returning temperature for current day
- * @return int - representing current temperature
- * */
-int Forecast::getTemperature(unsigned int n /*= 0*/) {
-    return this->days[n].at("temp").at("day").get<int>();
-}
+
 
 size_t Forecast::getForecastedDaysCount() {
     return this->days.size();
 }
 
-int Forecast::getFeelsLikeTemperature(unsigned int n /*= 0*/) {
-    return this->days[n].at("feels_like").at("day").get<int>();
-}
-
-int Forecast::getPressure(unsigned int n /*= 0*/) {
-    return this->days[n].at("pressure").get<int>();
-}
-
-int Forecast::getHumidity(unsigned int n /*= 0*/) {
-    return this->days[n].at("humidity").get<int>();
-}
-
-int Forecast::getUVI(unsigned int n /*= 0*/) {
-    return this->days[n].at("uvi").get<int>();
-}
-
-double Forecast::getWindSpeed(unsigned int n) {
-    return this->days[n].at("wind_speed").get<double>();
-}
-
-double Forecast::getWindGust(unsigned int n) {
-    return this->days[n].at("wind_gust").get<double>();
-}
-
-int Forecast::getWindDegree(unsigned int n) {
-    return this->days[n].at("wind_deg").get<int>();
-}
 
 
-
-Weather Forecast::getWeather(unsigned int n) {
-    Weather weather;
-
-    // I don't know why weather is returned as array, but it is.
-    nlohmann::json weather_json = this->days[n].at("weather")[0];
-
-    weather.id = weather_json.at("id").get<int>();
-    weather.main = weather_json.at("main").get<std::string>();
-    weather.description = weather_json.at("description").get<std::string>();
-
-    // The API allows you to specify the size of the icon, but it only seems to support only 2x and 4x and I will always need 4x.
-    weather.icon = "https://openweathermap.org/img/wn/" + weather_json.at("icon").get<std::string>() + "@4x.png";
-
-    return weather;
-}
 
 
 /**
  * Returns weather for current day on specified hour.
  * If n is zero will return current weather.
  * @param n
- * @return
+ * @return HourlyForecast
  */
 HourlyForecast Forecast::getHourlyForecast(unsigned int n) {
     HourlyForecast hourlyWeather;
@@ -108,6 +59,7 @@ DailyForecast Forecast::getDailyForecast(unsigned int n) {
     dailyForecast.weather = mapWeather(this->days[n].at("weather")[0]);
     dailyForecast.wind = mapWind(this->days[n]);
     dailyForecast.time = mapUnixTime(this->days[n]);
+    dailyForecast.time.offset = this->data.value("timezone_offset", 0);
     dailyForecast.temperature = mapTemperature(this->days[n]);
 
 
@@ -195,9 +147,9 @@ UnixTime Forecast::mapUnixTime(const nlohmann::json& unixTime_json) {
 /*
  *
  *
-lat Geographical coordinates of the location (latitude)
-lon Geographical coordinates of the location (longitude)
-timezone Timezone name for the requested location
+lat Geographical coordinates of the cords (latitude)
+lon Geographical coordinates of the cords (longitude)
+timezone Timezone name for the requested cords
 timezone_offset Shift in seconds from UTC
 current Current weather data API response
 current.dt Current time, Unix, UTC

@@ -31,11 +31,12 @@ struct Temperature{
 };
 
 struct UnixTime{
-    int dt;
-    int sunrise;
-    int sunset;
-    int moonrise;
-    int moonset;
+    int offset;
+    int64_t dt;
+    int64_t sunrise;
+    int64_t sunset;
+    int64_t moonrise;
+    int64_t moonset;
     double moon_phase;
 };
 
@@ -87,16 +88,6 @@ public:
 
     HourlyForecast getHourlyForecast(unsigned int = 0);
     DailyForecast getDailyForecast(unsigned int = 0);
-
-    int getTemperature(unsigned int = 0);
-    int getHumidity(unsigned int = 0);
-    int getPressure(unsigned int = 0);
-    int getFeelsLikeTemperature(unsigned int = 0);
-    int getUVI(unsigned  int = 0);
-
-    double getWindSpeed(unsigned int = 0);
-    double getWindGust(unsigned int = 0);
-    int getWindDegree(unsigned int = 0);
 
 
 

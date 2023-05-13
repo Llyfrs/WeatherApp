@@ -7,6 +7,7 @@
 
 #include <QWidget>
 #include <QMainWindow>
+#include <QTimeZone>
 #include "../API/WeatherAPI.h"
 
 
@@ -29,12 +30,23 @@ private:
 
     QAction* exitAction;
     QAction* settingsAction;
-    QAction* historyAction;
+
+    QTimer* timer;
+
+
+    std::vector<std::pair<double, QPixmap>> moonIcons;
+
+
+    void showDayData(const DailyForecast& day, QTimeZone timeZone);
+
+    void setWind(Wind wind);
+    void setMisc(Atmospheric atmospheric);
+
+    void setCelestial(DailyForecast day, QTimeZone timeZone);
 
 public slots:
     void exit();
     void openSettings();
-    void openHistory();
     void openDay();
     void update();
 

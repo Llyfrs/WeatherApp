@@ -12,19 +12,24 @@
 #include <curlpp/Options.hpp>
 #include <curlpp/Easy.hpp>
 
-
-
-struct Location {
+struct Cords {
     double lat;
     double lon;
+
+    Cords(double lat, double lon): lat(lat), lon(lon) {};
+    Cords(): lat(0), lon(0) {};
+};
+
+struct Location {
+    Cords cords;
     std::string country;
     std::string name;
     std::string state;
 
     Location(double lat, double lon, std::string country, std::string name, std::string state)
-            :lat(lat), lon(lon), country(std::move(country)), name(std::move(name)), state(std::move(state)) {};
+            : cords(lat, lon), country(std::move(country)), name(std::move(name)), state(std::move(state)) {};
 
-    Location(): lat(0), lon(0), country("N/A"), name("N/A") {}
+    Location(): cords(0,0), country("N/A"), name("N/A") {}
 
 };
 
@@ -44,10 +49,8 @@ namespace API {
         GeoAPI() = default;
         explicit GeoAPI(std::string key);
 
-        Location getLocation(const std::string&);
-        Location getLocation(double, double);
 
-        std::vector<Location> getLocations(double, double, int );
+        std::vector<Location> getLocations(Cords, int );
         std::vector<Location> getLocations(const std::string&, int);
 
         bool testAPIkey();

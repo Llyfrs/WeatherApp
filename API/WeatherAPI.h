@@ -9,19 +9,29 @@
 
 namespace API {
 
+
+    namespace UNITS {
+        static std::string METRIC = "metric";
+        static std::string IMPERIAL = "imperial";
+        static std::string STANDARD = "standard";
+    }
+
+
+
     class WeatherAPI {
     private:
         std::string key;
-        Location location;
+        Cords cords;
+        std::string units;
 
     public:
         WeatherAPI() = default;
         explicit WeatherAPI(std::string key);
-        WeatherAPI(std::string key, Location location);
+        WeatherAPI(std::string key, Cords cords, std::string  units = UNITS::METRIC);
 
         Forecast getForecast();
-        void setLocation(Location);
-        Location getLocation();
+        void setLocation(Cords);
+        Cords getLocation();
 
     };
 

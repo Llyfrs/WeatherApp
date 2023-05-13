@@ -54,8 +54,8 @@ std::vector<Location> API::GeoAPI::getLocations(const std::string& searchedLocat
 
     for(auto location : data) {
         Location loc;
-        loc.lat = location.at("lat").get<double>();
-        loc.lon = location.at("lon").get<double>();
+        loc.cords.lat = location.at("lat").get<double>();
+        loc.cords.lon = location.at("lon").get<double>();
         loc.country = location.at("country").get<std::string>();
         loc.name = location.at("name").get<std::string>();
         loc.state = location.value("state", "N/A");
@@ -66,22 +66,15 @@ std::vector<Location> API::GeoAPI::getLocations(const std::string& searchedLocat
     return locations;
 }
 
-Location API::GeoAPI::getLocation(const std::string& searchedLocation) {
-    std::vector<Location> locations = this->getLocations(searchedLocation, 1);
-    if(locations.empty())
-        throw std::runtime_error("No location found");
-    return locations[0];
-
-}
 
 
-std::vector<Location> API::GeoAPI::getLocations(double lat, double lon, int limit) {
+std::vector<Location> API::GeoAPI::getLocations(Cords cords, int limit) {
 
     std::vector<Location> locations;
 
 
-    std::string url = "https://api.openweathermap.org/geo/1.0/reverse?lat=" + std::to_string(lat) + "&lon=" +
-                              std::to_string(lon) + "&limit=" + std::to_string(limit) + "&appid=" + this->key;
+    std::string url = "https://api.openweathermap.org/geo/1.0/reverse?lat=" + std::to_string(cords.lat) + "&lon=" +
+                              std::to_string(cords.lon) + "&limit=" + std::to_string(limit) + "&appid=" + this->key;
 
 
     std::cout << url << std::endl;
@@ -90,8 +83,8 @@ std::vector<Location> API::GeoAPI::getLocations(double lat, double lon, int limi
 
     for(auto location : data) {
         Location loc;
-        loc.lat = location.at("lat").get<double>();
-        loc.lon = location.at("lon").get<double>();
+        loc.cords.lat = location.at("lat").get<double>();
+        loc.cords.lon = location.at("lon").get<double>();
         loc.country = location.at("country").get<std::string>();
         loc.name = location.at("name").get<std::string>();
         loc.state = location.value("state", "N/A");
@@ -101,10 +94,6 @@ std::vector<Location> API::GeoAPI::getLocations(double lat, double lon, int limi
 
 
     return locations;
-}
-
-Location API::GeoAPI::getLocation(double lat, double lon) {
-    return this->getLocations(lat,lon,1)[0];
 }
 
 
