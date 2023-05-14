@@ -4,8 +4,6 @@
 
 #include "Forecast.h"
 #include <utility>
-
-
 #include "iostream"
 
 Forecast::Forecast(nlohmann::json data): data(std::move(data)) {
@@ -16,13 +14,9 @@ Forecast::Forecast(nlohmann::json data): data(std::move(data)) {
 
 }
 
-
 size_t Forecast::getForecastedDaysCount() {
     return this->days.size();
 }
-
-
-
 
 
 /**
