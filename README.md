@@ -2,7 +2,7 @@
 
 This is application providing user with current information about the weather. 
 The data comes from [openweatherAPI](https://openweathermap.org/api). For the program to work properly an
-API key from them is required. It can be inserted in the settings.(Right now it's hardcoded)
+API key from them is required. It can be inserted in the settings.
 
 The main window consists of current weather information and forecast for the next 5 days, more information
 for specific day can be shown by hovering your mouse over it, which will cause the info box to update with,
